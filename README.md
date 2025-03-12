@@ -1,0 +1,2 @@
+# winbadusb
+一种绕过杀软加载执行远程powershell命令的badusb制作方法
